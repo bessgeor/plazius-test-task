@@ -6,8 +6,22 @@ namespace plazius_test_task
 	{
 		public TravelCard( string departureFrom, string arriveTo )
 		{
+			ValidateCity( departureFrom, nameof( departureFrom ) );
+			ValidateCity( arriveTo, nameof( arriveTo ) );
+			if ( departureFrom == arriveTo )
+				throw new ArgumentException( "Arrival and departure cities should not match" );
 			DepartureFrom = departureFrom;
 			ArriveTo = arriveTo;
+
+			void ValidateCity( string value, string argName )
+			{
+				if ( value is null )
+					throw new ArgumentNullException( argName );
+				if ( value == String.Empty )
+					throw new ArgumentException( "Empty city is not allowed: " + argName );
+				if ( Char.IsLower( value[ 0 ] ) )
+					throw new ArgumentException( "Lowercase-starting city is not allowed: " + argName );
+			}
 		}
 
 		public string DepartureFrom { get; }
