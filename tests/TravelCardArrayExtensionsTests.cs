@@ -46,6 +46,24 @@ namespace plazius_test_task_tests
 						new[] { MakeCard( "Västerås", "Stockholm" ), MakeCard( "Stockholm", "Oslo" ), MakeCard( "Oslo", "Trondheim" ), MakeCard( "Trondheim", "Reykjavík" ) },
 						"Array of four elements is sorted"
 					);
+					yield return
+					(
+						new[] { MakeCard( "Oslo", "Trondheim" ), MakeCard( "Västerås", "Stockholm" ), MakeCard( "Trondheim", "Reykjavík" ), MakeCard( "Stockholm", "Oslo" ) },
+						new[] { MakeCard( "Västerås", "Stockholm" ), MakeCard( "Stockholm", "Oslo" ), MakeCard( "Oslo", "Trondheim" ), MakeCard( "Trondheim", "Reykjavík" ) },
+						"Array of four elements (reverted) is sorted"
+					);
+					yield return
+					(
+						new[] { MakeCard( "Trondheim", "Reykjavík" ), MakeCard( "Reykjavík", "Nuuk" ), MakeCard( "Västerås", "Stockholm" ), MakeCard( "Stockholm", "Oslo" ), MakeCard( "Oslo", "Trondheim" ) },
+						new[] { MakeCard( "Västerås", "Stockholm" ), MakeCard( "Stockholm", "Oslo" ), MakeCard( "Oslo", "Trondheim" ), MakeCard( "Trondheim", "Reykjavík" ), MakeCard( "Reykjavík", "Nuuk" ) },
+						"Tricky case in which simple swap will fail"
+					);
+					yield return
+					(
+						new[] { MakeCard( "Stockholm", "Oslo" ), MakeCard( "Oslo", "Trondheim" ), MakeCard( "Rovaniemi", "Västerås" ), MakeCard( "Reykjavík", "Nuuk" ) , MakeCard( "Västerås", "Stockholm" ), MakeCard( "Trondheim", "Reykjavík" )},
+						new[] { MakeCard( "Rovaniemi", "Västerås" ), MakeCard( "Västerås", "Stockholm" ), MakeCard( "Stockholm", "Oslo" ), MakeCard( "Oslo", "Trondheim" ), MakeCard( "Trondheim", "Reykjavík" ), MakeCard( "Reykjavík", "Nuuk" ) },
+						"Array of six elements is sorted"
+					);
 
 					TravelCard MakeCard( string from, string to ) // just a shortcut
 						=> new TravelCard( from, to );
