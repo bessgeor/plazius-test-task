@@ -27,6 +27,9 @@ namespace plazius_test_task
 		public string DepartureFrom { get; }
 		public string ArriveTo { get; }
 
+		public override string ToString()
+			=> String.Concat( DepartureFrom, " → ", ArriveTo );
+
 		public override int GetHashCode()
 		{
 			unchecked

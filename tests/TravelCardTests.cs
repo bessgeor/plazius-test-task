@@ -34,6 +34,14 @@ namespace plazius_test_task_tests
 			card.ArriveTo.Should().Be( arriveTo );
 		}
 
+		[Test]
+		public void TravelCardToStringIsCorrect()
+		{
+			TravelCard card = new TravelCard( "Oslo", "Paris" );
+			string toStringResult = card.ToString();
+			toStringResult.Should().Be( "Oslo → Paris" );
+		}
+
 		private FluentAssertions.Specialized.ExceptionAssertions<TException> AssertException<TException>( string from, string to )
 			where TException : Exception
 			=> ( (Action) ( () => new TravelCard( from, to ) ) )
