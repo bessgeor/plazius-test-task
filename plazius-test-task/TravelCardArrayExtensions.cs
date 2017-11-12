@@ -88,5 +88,119 @@ namespace plazius_test_task
 				}
 			}
 		}
+
+		private sealed class MergeableLinkedListNode<T>
+		{
+			private MergeableLinkedListNode<T> _prev;
+			private MergeableLinkedListNode<T> _next;
+			public MergeableLinkedListNode<T> Previous
+			{
+				get => _prev;
+				set
+				{
+					if ( value != null )
+						value._next = this;
+					_prev = value;
+				}
+			}
+			public MergeableLinkedListNode<T> Next
+			{
+				get => _next;
+				set
+				{
+					if ( value != null )
+						value._prev = this;
+					_next = value;
+				}
+			}
+			public T Value { get; }
+
+			public MergeableLinkedListNode( T value ) => Value = value;
+		}
+
+		private sealed class MergeableLinkedList<T>
+		{
+			public MergeableLinkedListNode<T> First { get; private set; }
+			public MergeableLinkedListNode<T> Last { get; private set; }
+
+			public MergeableLinkedList( T value )
+				=> First = Last = Wrap( value );
+
+			public MergeableLinkedListNode<T> AddFirst( T value )
+				=> AddFirst( Wrap( value ) );
+
+			public MergeableLinkedListNode<T> AddFirst( MergeableLinkedListNode<T> wrapped )
+			{
+				wrapped.Next = First;
+				First = wrapped;
+				while ( wrapped.Previous != null )
+					First = wrapped = wrapped.Previous;
+				return First;
+			}
+
+			public MergeableLinkedListNode<T> AddLast( T value )
+				=> AddLast( Wrap( value ) );
+
+			public MergeableLinkedListNode<T> AddLast( MergeableLinkedListNode<T> wrapped )
+			{
+				wrapped.Previous = Last;
+				Last = wrapped;
+				while ( wrapped.Next != null )
+					Last = wrapped = wrapped.Previous; // is not called at all which is a consumer's implementation detail
+				return First;
+			}
+
+			private MergeableLinkedListNode<T> Wrap( T item )
+				=> new MergeableLinkedListNode<T>( item );
+		}
+
+		/// <summary>
+		/// Modifies input array to be sorted and returns reference to it
+		/// </summary>
+		public static TravelCard[] SortAllocatey( this TravelCard[] unsorted )
+		{
+			if ( unsorted is null )
+				throw new ArgumentNullException();
+			List<MergeableLinkedList<TravelCard>> clusters = new List<MergeableLinkedList<TravelCard>>( unsorted.Length );
+			foreach ( TravelCard current in unsorted )
+			{
+				int? left = null;
+				int? right = null;
+				for ( int i = 0; i < clusters.Count && (left == null || right == null); i++ )
+					if ( clusters[ i ]?.First.Value.DepartureFrom == current.ArriveTo )
+						left = i;
+					else if ( clusters[ i ]?.Last.Value.ArriveTo == current.DepartureFrom )
+						right = i;
+				if ( right.HasValue || left.HasValue )
+				{
+					if ( right.HasValue == left.HasValue )
+					{
+						clusters[ left.Value ].AddFirst( current );
+						clusters[ left.Value ].AddFirst( clusters[ right.Value ].Last );
+						clusters[ right.Value ] = null;
+					}
+					else if ( right.HasValue )
+						clusters[ right.Value ].AddLast( current );
+					else clusters[ left.Value ].AddFirst( current );
+				}
+				else
+				{
+					MergeableLinkedList<TravelCard> cluster = new MergeableLinkedList<TravelCard>( current );
+					clusters.Add( cluster );
+				}
+			}
+			foreach ( MergeableLinkedList<TravelCard> cluster in clusters )
+				if ( cluster != null )
+				{
+					MergeableLinkedListNode<TravelCard> current = cluster.First;
+					for ( int i = 0; i < unsorted.Length; i++ )
+					{
+						unsorted[ i ] = current.Value;
+						current = current.Next;
+					}
+					break;
+				}
+			return unsorted;
+		}
 	}
 }

@@ -16,13 +16,20 @@ namespace plazius_test_task_tests
 			=> ( (Action) ( () => ( (TravelCard[]) null ).Sort() ) )
 			.ShouldThrow<ArgumentNullException>();
 
+		[Test]
+		public void NullArrayIsThrowingForAllocateySort()
+			=> ( (Action) ( () => ( (TravelCard[]) null ).SortAllocatey() ) )
+			.ShouldThrow<ArgumentNullException>();
+
 		private class UnsortedAndSortedTravelCardArraysSource : IEnumerable<TestCaseData>
 		{
 			public IEnumerator<TestCaseData> GetEnumerator()
 			{
-				return EnumerateRealCases()
-					.Select( c => new TestCaseData( c.unsorted, c.sorted ).SetName( c.name ) )
-					.GetEnumerator();
+				return (
+					from sortMethod in new (string name, Func<TravelCard[], TravelCard[]> lambda)[] { ("sort", tc => tc.Sort()), ("allocatey sort", tc => tc.SortAllocatey()) }
+					from @case in EnumerateRealCases()
+					select new TestCaseData( @case.unsorted, sortMethod.lambda, @case.sorted ).SetName( String.Concat( @case.name, " by ", sortMethod.name ) )
+				).GetEnumerator();
 
 				IEnumerable<(TravelCard[] unsorted, TravelCard[] sorted, string name)> EnumerateRealCases()
 				{
@@ -76,8 +83,8 @@ namespace plazius_test_task_tests
 
 		[Test]
 		[TestCaseSource( typeof( UnsortedAndSortedTravelCardArraysSource ) )]
-		public void SortIsSorting( TravelCard[] unsorted, TravelCard[] sorted )
-			=> unsorted.Sort()
+		public void SortIsSorting( TravelCard[] unsorted, Func<TravelCard[], TravelCard[]> sort, TravelCard[] sorted )
+			=> sort( unsorted )
 			.Should().ContainInOrder( sorted ) // asserts only order disregarding of consecutiveness
 			.And.Subject
 			.Should().HaveCount( sorted.Length ); // forces consecutiveness
