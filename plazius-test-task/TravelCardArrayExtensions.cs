@@ -157,16 +157,16 @@ namespace plazius_test_task
 		/// <summary>
 		/// Modifies input array to be sorted and returns reference to it
 		/// </summary>
-		public static TravelCard[] SortAllocatey( this TravelCard[] unsorted )
+		public static TravelCard[] SortAllocatey( this TravelCard[] unsorted ) // O(n^2), Ω(n) by time, O(n^2), Ω(n) by memory, O(n^2), Ω(n) by heap allocations
 		{
 			if ( unsorted is null )
 				throw new ArgumentNullException();
 			List<MergeableLinkedList<TravelCard>> clusters = new List<MergeableLinkedList<TravelCard>>( unsorted.Length );
-			foreach ( TravelCard current in unsorted )
+			foreach ( TravelCard current in unsorted ) // n
 			{
 				int? left = null;
 				int? right = null;
-				for ( int i = 0; i < clusters.Count && (left == null || right == null); i++ )
+				for ( int i = 0; i < clusters.Count && (left == null || right == null); i++ ) // O(n), Ω(1)
 					if ( clusters[ i ]?.First.Value.DepartureFrom == current.ArriveTo )
 						left = i;
 					else if ( clusters[ i ]?.Last.Value.ArriveTo == current.DepartureFrom )
@@ -175,21 +175,21 @@ namespace plazius_test_task
 				{
 					if ( right.HasValue == left.HasValue )
 					{
-						clusters[ left.Value ].AddFirst( current );
-						clusters[ left.Value ].AddFirst( clusters[ right.Value ].Last );
+						clusters[ left.Value ].AddFirst( current ); // alloc, O(1)
+						clusters[ left.Value ].AddFirst( clusters[ right.Value ].Last ); // O(n), Ω(1)
 						clusters[ right.Value ] = null;
 					}
 					else if ( right.HasValue )
-						clusters[ right.Value ].AddLast( current );
-					else clusters[ left.Value ].AddFirst( current );
+						clusters[ right.Value ].AddLast( current ); // alloc, O(1)
+					else clusters[ left.Value ].AddFirst( current ); // alloc O(1)
 				}
 				else
 				{
-					MergeableLinkedList<TravelCard> cluster = new MergeableLinkedList<TravelCard>( current );
+					MergeableLinkedList<TravelCard> cluster = new MergeableLinkedList<TravelCard>( current ); // 2 alloc
 					clusters.Add( cluster );
 				}
 			}
-			foreach ( MergeableLinkedList<TravelCard> cluster in clusters )
+			foreach ( MergeableLinkedList<TravelCard> cluster in clusters ) // n
 				if ( cluster != null )
 				{
 					MergeableLinkedListNode<TravelCard> current = cluster.First;
