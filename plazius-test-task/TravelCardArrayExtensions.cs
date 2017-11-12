@@ -5,50 +5,50 @@ namespace plazius_test_task
 {
 	public static class TravelCardArrayExtensions
 	{
-		public static TravelCard[] Sort( this TravelCard[] unsorted )
+		public static TravelCard[] Sort( this TravelCard[] unsorted ) // O( n^3 ), Ω( nlog(n) ) by time, O(n) by memory, O(1) by heap allocations
 		{
 			if ( unsorted is null )
 				throw new ArgumentNullException();
 			if ( unsorted.Length == 0 )
 				return unsorted;
 			List<TravelCard> sortedCards = new List<TravelCard>( unsorted.Length ); // is not LinkedList because of LinkedListNode is a reference type. May be implemented on LinkedList of LinkedLists in some unmanaged language if a really hot path
-			for ( int i = 0; i < unsorted.Length; i++ )
+			for ( int i = 0; i < unsorted.Length; i++ ) // n
 			{
 				TravelCard current = unsorted[ i ];
-				(int insertTo, bool? toLeft) = FindIndexToInsertTo( current );
-				sortedCards.Insert( insertTo, current );
+				(int insertTo, bool? toLeft) = FindIndexToInsertTo( current ); // O( n ), Ω( log(n) )
+				sortedCards.Insert( insertTo, current );  // O( n ), Ω( 1 )
 				if ( toLeft.HasValue )
 				{
 					bool alreadyFound = false;
 					if ( toLeft == true )
-						for ( int j = sortedCards.Count - 1; j > -1; j-- )
+						for ( int j = sortedCards.Count - 1; j > -1; j-- ) // n
 						{
 							string currentCity = sortedCards[ insertTo ].DepartureFrom;
 							string possibleMatchCity = sortedCards[ j ].ArriveTo;
 							if ( currentCity == possibleMatchCity )
 							{
 								TravelCard original = sortedCards[ j ];
-								/// j is always greater than insertTo because of left to right loop in <see cref="FindIndexToInsertTo(TravelCard)"/>
-								sortedCards.RemoveAt( j );
+								/// j is always greater than insertTo because of left to right direction in <see cref="FindIndexToInsertTo(TravelCard)"/>
+								sortedCards.RemoveAt( j ); // O( n ), Ω( 1 )
 								j++;
-								sortedCards.Insert( insertTo, original );
+								sortedCards.Insert( insertTo, original ); // O( n ), Ω( 1 )
 								alreadyFound = true;
 							}
 							else if ( alreadyFound )
 								break;
 						}
 					else
-						for ( int j = 0; j < sortedCards.Count; j++ )
+						for ( int j = 0; j < sortedCards.Count; j++ ) // n - 1 at worst
 						{
 							string currentCity = sortedCards[ insertTo ].ArriveTo;
 							string possibleMatchCity = sortedCards[ j ].DepartureFrom;
 							if ( currentCity == possibleMatchCity )
 							{
 								TravelCard original = sortedCards[ j ];
-								/// j is always greater than insertTo because of left to right loop in <see cref="FindIndexToInsertTo(TravelCard)"/>
-								sortedCards.RemoveAt( j );
+								/// j is always greater than insertTo because of left to right direction in <see cref="FindIndexToInsertTo(TravelCard)"/>
+								sortedCards.RemoveAt( j ); // O( n ), Ω( 1 )
 								insertTo++;
-								sortedCards.Insert( insertTo, original );
+								sortedCards.Insert( insertTo, original ); // O( n ), Ω( 1 )
 								alreadyFound = true;
 							}
 							else if ( alreadyFound )
@@ -58,7 +58,7 @@ namespace plazius_test_task
 			}
 			return sortedCards.ToArray();
 
-			(int index, bool? left) FindIndexToInsertTo( TravelCard toFindPositionFor )
+			(int index, bool? left) FindIndexToInsertTo( TravelCard toFindPositionFor ) // O( n ), Ω( log(n) )
 			{
 				(int, bool?) @default = (sortedCards.Count /* not 0 because of excess of array shifts here and there */, null);
 				if ( sortedCards.Count == 0 ) return @default;
